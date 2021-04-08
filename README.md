@@ -1,1 +1,1 @@
-"# object_detection_for_ncnu" 
+# object_detection_for_ncnu
