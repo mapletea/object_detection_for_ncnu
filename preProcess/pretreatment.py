@@ -10,18 +10,15 @@ def img_to_pixel(fl, size, gray):
     # @fl: the image file
     # @size: the size of image array
     # @gray: use gray or not
-    
+
+    image = Image.open(fl)
     if gray:
-        image = Image.open(fl).convert('L')
-    else:
-        image = Image.open(fl)
-        
+        image.convert('L')
     image = image.resize((size,size))
     data = np.array(image)
     data = data.reshape(size*size)
     data = data.astype('uint8')
-    return data 
-    
+    return data
     
 def make_data(image_dir, save_dir, size, gray):
     #  --- make image data to array and save csv ---  #
@@ -42,11 +39,7 @@ def make_data(image_dir, save_dir, size, gray):
         'restrauant': 7, # 學餐
     }
 
-    if gray:
-        save_filename = save_dir+'gray_data_'+str(size)+'.csv'
-    else:
-        save_filename = save_dir+'RGB_data_'+str(size)+'.csv'
-    with open(save_filename, 'w', newline='') as csvfile:
+    with open(save_dir+'data_'+str(size)+'.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         pixel_list = []
         for i in range(size*size):
@@ -61,4 +54,4 @@ def make_data(image_dir, save_dir, size, gray):
     csvfile.close()
 
 if __name__ == '__main__':
-    make_data(image_dir=['../data/label_building/', '../data/augmentation/'], save_dir='../data/array/', size = 128, gray=False)
+    make_data(image_dir=['../data/label_building/', '../data/augmentation/'], save_dir='../data/array/', size = 128, gray=True)

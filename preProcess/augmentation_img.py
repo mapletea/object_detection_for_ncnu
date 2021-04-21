@@ -20,8 +20,6 @@ def generate_img(img, N, rotateRange, wShiftRange, hShiftRange, zoomRange, brigh
     # @brightRange: the range for brightness(tuple or list for two float)
 
     # generate image
-    size = (128,128)
-    image = img.resize(size)
     data = img_to_array(img)
     samples = expand_dims(data, 0)
     datagen = ImageDataGenerator(rotation_range=rotateRange, width_shift_range=wShiftRange, height_shift_range=hShiftRange, zoom_range=zoomRange, brightness_range=brightRange)
@@ -40,7 +38,7 @@ def augment_img(files, augN, genN, re_size):
     # @augN: random augment n image
     # @genN: generate n images for 7 method
     
-    # method of augmentation
+    # generate new images for every files
     flag = False
     aug_method = []
     for rotate_range in [0, 80]:
@@ -51,15 +49,14 @@ def augment_img(files, augN, genN, re_size):
                         aug_method.append([rotate_range, wShift_range, zoom_range, bright_range])
                     flag = True
     
-    # select method to augment image 
     gen_images = []
     for fl in files:
-        print(fl)
+        print(fl, len(gen_images))
         img = Image.open(fl)#.convert("RGB")
         image = img.resize(re_size)
         for i in range(genN):
             seed = random.randrange(len(aug_method))
-            gen_images.extend(generate_img(img, N=genN, rotateRange=aug_method[seed][0], wShiftRange=aug_method[seed][1], hShiftRange=0.0, zoomRange=aug_method[seed][2], brightRange=aug_method[seed][3]))
+            gen_images.extend(generate_img(image, 1, rotateRange=aug_method[seed][0], wShiftRange=aug_method[seed][1], hShiftRange=0.0, zoomRange=aug_method[seed][2], brightRange=aug_method[seed][3]))
     random.shuffle(gen_images)
     return gen_images[:augN]
 
@@ -78,8 +75,8 @@ def add_images(image_dir, save_image_dir, requestN, origin):
     #  --- augment image to requestN and save to path  ---  #
     # @image_dir: the origin images used to augment image is in this directory
     # @save_image_dir: the directory where save augment image
+    # @save_array_path: the directory where save array data
     # @requestN: the images in two directory reached this amount
-    # @origin: save origin images (with augment images) to save_image_dir
 
     label_dict={
         'science': 0, # 科院
@@ -97,8 +94,10 @@ def add_images(image_dir, save_image_dir, requestN, origin):
     for key in label_dict.keys():
         files = search_files(image_dir, key)
         haveN = len(files)
+        if haveN == 0:
+            continue
         augN = requestN-haveN
-        genN = int(haveN/augN)+1
+        genN = int(augN/haveN)+1
         re_size = (128,128)
         if origin:
             num = 0
@@ -116,7 +115,7 @@ def add_images(image_dir, save_image_dir, requestN, origin):
             for image in aug_images:
                 plt.imsave(os.path.join(save_image_dir,'{0}_{1}.jpg'.format(key, num)), image)
                 num += 1           
-       
-                
+        
+
 if __name__ == '__main__':
-    add_images(image_dir='../data/label_building/', save_image_dir='../data/augmentation/', requestN=60, origin=True)
+    add_images(image_dir='../data/label_building/', save_image_dir='../data/aug_new/', requestN=10000, origin=True)
